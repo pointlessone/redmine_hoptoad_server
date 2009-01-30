@@ -25,7 +25,7 @@ class NoticesController < ApplicationController
 
       issue.save!
 
-      journal = issue.init_journal(author, "h4. Backtrace\n\n<pre>#{notice['back'].to_yaml}</pre>\n\n
+      journal = issue.init_journal(author, "h4. Backtrace\n\n<pre>#{notice['backtrace'].to_yaml}</pre>\n\n
                                             h4. Request\n\n<pre>#{notice['request'].to_yaml}</pre>\n\n
                                             h4. Session\n\n<pre>#{notice['session'].to_yaml}</pre>\n\n
                                             h4. Environment\n\n<pre>#{notice['environment'].to_yaml}</pre>")
