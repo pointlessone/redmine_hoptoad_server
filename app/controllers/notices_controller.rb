@@ -7,11 +7,18 @@ class NoticesController < ApplicationController
 
     if authorized = Setting.mail_handler_api_key == redmine_params[:api_key]
 
+      # Current limit for strings on most DB backends
+      if notice['error_message'].length > 255
+        # We don't want long Subjects while they can be displayed in whole
+        subject = "#{notice['error_message'][0...120]}..."
+      else
+        subject = notice['error_message']
+      end
       project = Project.find_by_identifier(redmine_params[:project])
       tracker = project.trackers.find_by_name(redmine_params[:tracker])
       author = User.anonymous
 
-      issue = Issue.find_or_initialize_by_subject_and_project_id_and_tracker_id_and_author_id_and_description(notice['error_message'],
+      issue = Issue.find_or_initialize_by_subject_and_project_id_and_tracker_id_and_author_id_and_description(subject,
                                                                                                               project.id,
                                                                                                               tracker.id,
                                                                                                               author.id,
@@ -25,7 +32,8 @@ class NoticesController < ApplicationController
 
       issue.save!
 
-      journal = issue.init_journal(author, "h4. Backtrace\n\n<pre>#{notice['backtrace'].to_yaml}</pre>\n\n
+      journal = issue.init_journal(author, "#{notice['error_message'].length > 255 ? "#{notice['error_message']}\n\n" : '' }
+                                            h4. Backtrace\n\n<pre>#{notice['backtrace'].to_yaml}</pre>\n\n
                                             h4. Request\n\n<pre>#{notice['request'].to_yaml}</pre>\n\n
                                             h4. Session\n\n<pre>#{notice['session'].to_yaml}</pre>\n\n
                                             h4. Environment\n\n<pre>#{notice['environment'].to_yaml}</pre>")
